@@ -1,0 +1,36 @@
+Hier ist der ursprüngliche Prompt, den du mir geschrieben hast, um den `ProductController` sowie die gesamte zugehörige Struktur (Templates, Repositories, Datenbank-Tabellen) anzulegen:
+
+---
+
+Lege jetzt alles an für Products, wie bei Usern. Also `ProductController`, `ProductRepository`, `Product.php` Model (in `Domain/Model/Product.php`), Templates: `List.php`, `New.php`, `Edit.php`.
+
+In der `Init.php` soll in der `activate` Methode die Tabelle `wsf_products` angelegt werden.
+Felder für `wsf_products`:
+- `id`
+- `title`
+- `sku` (Unique)
+- `price` (Decimal)
+- `tax_rate` (Decimal, default 19.00)
+- `currency` (Varchar, default EUR)
+- `status` (active, inactive)
+- `created_at`
+- `updated_at`
+
+Der `ProductController` soll die gleichen Actions wie der `UserController` haben: `listAction`, `newAction`, `editAction`, `createAction`, `updateAction`.
+
+Die Templates im Backend sollen die Standard WordPress-Tabellen (`wp-list-table`) und Formular-Styles nutzen.
+
+Registriere das Modul auch in der `Init.php` für die REST-API und füge den Menüpunkt "Products" im WsForms-Menü hinzu.
+
+---
+
+Hier ist der Prompt, den du mir geschrieben hast, um die Funktionalität für `wsf_product_media` (WordPress Media Library Integration) einzubauen:
+
+---
+
+Wenn Product/New.php geladen wird, dann soll auch wp.media geladen werden, via enque_script oder so, wordpress offizielles laden von wp.media. Es soll ein Button geben bei New.php, der heißt "Add media". Beim Klick auf den Button sollen wp.media wordpress files zur auswahl stehen, man soll mehrere wählen können. Die gewählten sollen via JavaScript jQuery als vorschau dargestellt werden in New.php.
+Wenn der User dann den New.php form submitted, sollen die ids der gewählten via rest api an Product createAction übertragen werden. Dann sollen `wsf_product_media` table rows angelegt werden mit der neu angelegten `product_id`. Mache das erstmal.
+
+---
+
+*(Hinweis: Direkt im Anschluss hast du mich noch gebeten, das Feld `created_at` in der Tabelle zu ergänzen, was ich ebenfalls umgesetzt habe.)*

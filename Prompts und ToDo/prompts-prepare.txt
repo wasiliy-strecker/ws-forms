@@ -1,0 +1,41 @@
+ich möchte skripte nur laden wenn ws_forms shortcode auf der Seite ist in frontend
+
+    public static function register_services() {
+        $instance = new self();
+
+        // REST API IMMER registrieren (außerhalb von is_admin)
+        add_action('rest_api_init', [$instance, 'registerRestRoutes']);
+
+        if (is_admin()) {
+            add_action('admin_enqueue_scripts', [$instance, 'enqueueBackendAssets']);
+            add_action('admin_menu', [$instance, 'addAdminMenu']);
+        }
+
+        if (!is_admin()) {
+            add_action('wp_enqueue_scripts', [$instance, 'enqueueFrontendAssets']);
+            $userController = new \Ws\WsForms\Controller\UserController();
+            add_shortcode('ws_forms', [$userController, 'initAction']);
+        }
+
+    }
+
+     /**
+         * Enqueue Assets für das Frontend
+         */
+        public function enqueueFrontendAssets() {
+            global $post;
+            if (!is_a($post, 'WP_Post') || !has_shortcode($post->post_content, 'wsf_forms')) {
+               return;
+            }
+
+            $this->registerCommonScripts();
+
+            wp_enqueue_style(
+                'wsf_main_frontend_style',
+                plugin_dir_url(dirname(__FILE__)) . 'Resources/Public/Css/Frontend/Style.css',
+                [],
+                '1.0.0'
+            );
+        }
+
+    ist es richtig so?

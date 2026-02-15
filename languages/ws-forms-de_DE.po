@@ -1,0 +1,25 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WS Forms\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-28 09:00+0100\n"
+"PO-Revision-Date: 2026-01-28 08:10+0100\n"
+"Last-Translator: Admin\n"
+"Language-Team: Deutsch\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.2\n"
+
+msgid "Users"
+msgstr "Benutzer"
+
+msgid "Add New User"
+msgstr "Neuer Benutzer"
+
+msgid "Anmelden"
+msgstr "Anmelden"
+
+msgid "Passwort"
+msgstr "Passwort"

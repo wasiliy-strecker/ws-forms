@@ -1,0 +1,1001 @@
+/* Material Design 3 Modal */
+.wsf_m3_modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.wsf_m3_modal.wsf_show {
+    display: block !important;
+}
+
+.wsf_m3_modal_content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 28px;
+    width: 90%;
+    max-width: 560px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: wsf_m3_modal_anim;
+    animation-duration: 0.4s;
+    overflow: hidden;
+}
+
+@keyframes wsf_m3_modal_anim {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+.wsf_m3_modal_header {
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.wsf_m3_modal_body {
+    padding: 24px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.wsf_m3_modal_footer {
+    padding: 24px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.wsf_m3_modal_close {
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #49454f;
+}
+
+/* Utilities */
+.wsf_me_2 { margin-right: 0.5rem !important; }
+.wsf_my_4 { margin-top: 1.5rem !important; margin-bottom: 1.5rem !important; }
+.wsf_p_4 { padding: 1.5rem !important; }
+.wsf_text_success { color: #2e7d32 !important; }
+.wsf_m3_body_large { font-size: 1rem; line-height: 1.5; }
+.wsf_m3_headline_small { font-size: 1.5rem; font-weight: 400; line-height: 1.2; }
+.wsf_hide, #wsf_main .d-none { display: none !important; }
+.wsf_display_block { display: block !important; }
+.wsf_display_flex, #wsf_main .wsf_d_flex { display: flex !important; }
+
+#wsf_main {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    color: #212529;
+    box-sizing: border-box;
+}
+
+#wsf_main *, #wsf_main *::before, #wsf_main *::after {
+    box-sizing: inherit;
+}
+
+#wsf_main h1, #wsf_main h2, #wsf_main .wsf_title {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+#wsf_main h1 { font-size: 2rem; }
+#wsf_main h2 { font-size: 1.75rem; }
+
+/* Spacing & Alignment Utilities */
+#wsf_main .wsf_mt_5 { margin-top: 3rem !important; }
+#wsf_main .wsf_mb_3 { margin-bottom: 1rem !important; }
+#wsf_main .wsf_mb_4 { margin-bottom: 1.5rem !important; }
+#wsf_main .wsf_mt_2 { margin-top: 0.5rem !important; }
+#wsf_main .wsf_justify_content_between { justify-content: space-between !important; }
+#wsf_main .wsf_align_items_center { align-items: center !important; }
+#wsf_main .wsf_text_end, #wsf_main .wsf_text_end { text-align: right !important; }
+#wsf_main .wsf_text_center { text-align: center !important; }
+#wsf_main .wsf_w_100 { width: 100% !important; }
+
+/* =========================================
+   2. GRID SYSTEM
+   ========================================= */
+#wsf_main .wsf_row, .wsf_header_row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -1rem;
+    margin-left: -1rem;
+}
+
+/* Header Row Specifics from new CSS merged into Grid */
+.wsf_header_row {
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#wsf_main .col-12, #wsf_main .wsf_col_md_4, #wsf_main .wsf_col_md_8, #wsf_main .wsf_col_md_12 {
+    position: relative;
+    width: 100%;
+    padding-right: 1rem;
+    padding-left: 1rem;
+}
+
+@media (min-width: 768px) {
+    #wsf_main .wsf_col_md_4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+    #wsf_main .wsf_col_md_8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+    #wsf_main .wsf_col_md_12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* =========================================
+   3. COMPONENTS: CARDS (Used for Login & Lists)
+   ========================================= */
+#wsf_main .wsf_card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.25rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Added shadow for better login look */
+}
+
+#wsf_main .wsf_card_header {
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    font-weight: 500;
+}
+
+#wsf_main .wsf_card_body {
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+
+/* Login Wrapper Specific */
+.wsf_login_wrapper {
+    max-width: 450px;
+    margin: 2rem auto;
+}
+
+/* =========================================
+   4. COMPONENTS: FORMS
+   ========================================= */
+#wsf_main .form-label,
+#wsf_main .wsf_label {
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    font-weight: 600;
+}
+
+/* Merging old .wsf_form_control with new .wsf_input */
+#wsf_main .wsf_form_control,
+#wsf_main .wsf_form_select,
+#wsf_main .wsf_input {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#wsf_main .wsf_form_control:focus,
+#wsf_main .wsf_form_select:focus,
+#wsf_main .wsf_input:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+#wsf_main .wsf_form_text,
+#wsf_main .description {
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #6c757d;
+}
+
+/* Validation Errors */
+#wsf_main .wsf_error_message {
+    display: flex;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: .875em;
+    color: #dc3545;
+    align-items: center;
+}
+#wsf_main .wsf_error_message .dashicons { margin-right: 0.25rem; }
+
+/* =========================================
+   5. COMPONENTS: BUTTONS
+   ========================================= */
+/* Merging .btn (Old) and .wsf_btn (New) */
+#wsf_main .btn,
+#wsf_main .wsf_btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    border-radius: 0.25rem;
+    transition: all .15s ease-in-out;
+    text-decoration: none;
+    line-height: 1.5;
+}
+
+/* Primary Button */
+#wsf_main .btn-primary,
+#wsf_main .wsf_btn_primary {
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+#wsf_main .btn-primary:hover,
+#wsf_main .wsf_btn_primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Secondary / Outline Button */
+#wsf_main .btn-secondary,
+#wsf_main .btn-outline-secondary,
+#wsf_main .wsf_btn_outline {
+    color: #6c757d;
+    border-color: #6c757d;
+    background-color: transparent;
+}
+#wsf_main .btn-secondary:hover,
+#wsf_main .btn-outline-secondary:hover,
+#wsf_main .wsf_btn_outline:hover {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+/* Danger Button */
+#wsf_main .wsf_btn_danger {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+#wsf_main .wsf_btn_danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}
+
+/* Small Button */
+#wsf_main .btn-sm, #wsf_main .wsf_btn_sm {
+    padding: 0.25rem 0.5rem;
+    font-size: .875rem;
+    border-radius: 0.2rem;
+}
+
+/* Link Button */
+#wsf_main .btn-link {
+    font-weight: 400;
+    color: #0d6efd;
+    text-decoration: underline;
+    border: none;
+}
+
+/* Close Button (X) */
+#wsf_main .btn-close {
+    box-sizing: content-box;
+    width: 1em; height: 1em;
+    padding: .25em .25em;
+    color: #000;
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    border: 0;
+    border-radius: .25rem;
+    opacity: .5;
+}
+#wsf_main .btn-close:hover { opacity: .75; }
+
+/* Loading Spinner */
+.wsf_btn_loading { position: relative; color: transparent !important; pointer-events: none; }
+.wsf_btn_spinner {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1.125rem; height: 1.125rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: wsf_rotate_spinner 0.8s linear infinite;
+    display: block;
+}
+@keyframes wsf_rotate_spinner {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* =========================================
+   6. COMPONENTS: TABLES
+   ========================================= */
+#wsf_main .table-responsive,
+#wsf_main .wsf_table_responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
+/* Merging .table (Old) and .wsf_table (New) */
+#wsf_main .table,
+#wsf_main .wsf_table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+    vertical-align: top;
+    border-color: #dee2e6;
+    border-collapse: collapse;
+}
+
+#wsf_main .table th, #wsf_main .table td,
+#wsf_main .wsf_table th, #wsf_main .wsf_table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+    text-align: left;
+}
+
+#wsf_main .table thead th,
+#wsf_main .wsf_table th {
+    vertical-align: bottom;
+    border-bottom-width: 2px;
+    background-color: #f8f9fa; /* From new CSS */
+    font-weight: 600;
+}
+
+/* Badges / Pills */
+#wsf_main .badge,
+#wsf_main .wsf_address_pill {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: .75em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+#wsf_main .wsf_address_pill {
+    border-radius: 12px; /* Pill shape */
+    background-color: #0d6efd;
+}
+#wsf_main .bg-secondary { background-color: #6c757d !important; }
+#wsf_main .wsf_badge { /* Generic wrapper if needed */
+    background-color: #6c757d;
+    padding: 0.25em 0.6em;
+    border-radius: 10rem;
+    color: #fff;
+    font-size: 0.75em;
+}
+
+/* =========================================
+   7. COMPONENTS: ALERTS (Success & Error)
+   ========================================= */
+.wsf_alert {
+    position: relative;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: wsfFadeIn 0.3s ease-out;
+}
+
+/* Success Variante (Grün) */
+.wsf_alert_success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border-color: #badbcc;
+}
+
+/* Danger Variante (Rot - für Login Fehler) */
+.wsf_alert_danger {
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+}
+
+/* Inhalt & Close Button */
+.wsf_alert_content {
+    flex-grow: 1;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.wsf_alert_close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: currentColor;
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 0 0 0 1rem;
+    transition: opacity 0.2s ease;
+}
+.wsf_alert_close:hover { opacity: 1; }
+
+@keyframes wsfFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Inline Alert Helper (z.B. im Login Form) */
+.wsf_alert_inline {
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    animation: wsfFadeIn 0.3s ease-out;
+}
+
+/* --- Material 3 Design System Variables --- */
+:root {
+    --wsf-m3-sys-primary: #6750A4;
+    --wsf-m3-sys-on-primary: #FFFFFF;
+    --wsf-m3-sys-surface: #FEF7FF;
+    --wsf-m3-sys-surface-container: #F3EDF7;
+    --wsf-m3-sys-on-surface: #1D1B20;
+    --wsf-m3-sys-on-surface-variant: #49454F;
+    --wsf-m3-sys-outline-variant: #CAC4D0;
+}
+
+/* --- Container & Layout --- */
+.wsf_m3_container {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--wsf-m3-sys-on-surface);
+    max-width: 900px; /* Optional: Lesbarkeit verbessern */
+}
+
+/* --- Card (Surface) --- */
+.wsf_m3_card {
+    background-color: var(--wsf-m3-sys-surface);
+    border-radius: 12px;
+    border: 1px solid var(--wsf-m3-sys-outline-variant);
+    overflow: hidden; /* Damit Ecken abgerundet bleiben */
+}
+
+/* --- List Styling --- */
+.wsf_m3_list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wsf_m3_list_item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px; /* M3 Standard Padding */
+    border-bottom: 1px solid var(--wsf-m3-sys-surface-container);
+    transition: background-color 0.2s ease-in-out;
+    min-height: 72px; /* M3 Two-line item height */
+}
+
+.wsf_m3_list_item:last-child {
+    border-bottom: none;
+}
+
+.wsf_m3_list_item:hover {
+    background-color: rgba(103, 80, 164, 0.08); /* Primary mit 8% Opacity */
+    cursor: default;
+}
+
+/* --- Leading (Avatar) --- */
+.wsf_m3_leading {
+    margin-right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wsf_m3_avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--wsf-m3-sys-primary);
+    color: var(--wsf-m3-sys-on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* --- Content (Text) --- */
+.wsf_m3_content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.wsf_m3_headline {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    width: fit-content;
+    color: var(--wsf-m3-sys-on-surface);
+    font-weight: 400; /* Regular weight for list items */
+}
+
+.wsf_m3_supporting_text {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    width: fit-content;
+    color: var(--wsf-m3-sys-on-surface-variant);
+}
+
+/* --- Trailing (Icons/Badges) --- */
+.wsf_m3_trailing {
+    margin-left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* --- Components: Badge --- */
+.wsf_m3_badge {
+    background-color: var(--wsf-m3-sys-surface-container);
+    color: var(--wsf-m3-sys-on-surface-variant);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 100px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+}
+
+/* --- Components: Buttons --- */
+.wsf_m3_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 24px;
+    border-radius: 20px; /* Full pill shape */
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: box-shadow 0.2s ease;
+}
+
+.wsf_m3_btn_filled {
+    background-color: var(--wsf-m3-sys-primary);
+    color: var(--wsf-m3-sys-on-primary);
+    border: none;
+}
+
+.wsf_m3_btn_filled:hover, .wsf_m3_btn_filled:focus {
+    background-color: #55418b; /* Etwas dunkler */
+    color: #ffffff;
+    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+}
+
+.wsf_m3_icon_btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--wsf-m3-sys-on-surface-variant);
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.wsf_m3_icon_btn:hover {
+    background-color: rgba(73, 69, 79, 0.08); /* Surface Variant Opacity */
+}
+
+.wsf_m3_display_small {
+    font-size: 24px;
+    line-height: 32px;
+    margin: 0;
+    font-weight: 400;
+}
+
+/* --- Material 3 Design System Variables --- */
+:root {
+    --wsf-m3-primary: #6750A4;
+    --wsf-m3-on-surface: #1D1B20;
+    --wsf-m3-on-surface-variant: #49454F;
+    --wsf-m3-outline: #79747E;
+    --wsf-m3-outline-variant: #CAC4D0;
+    --wsf-m3-error: #B3261E;
+    --wsf-m3-surface: #FEF7FF;
+}
+
+/* --- M3 Text Field Container --- */
+.wsf_m3_text_field {
+    position: relative;
+    margin-bottom: 4px; /* Space for supporting text */
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- The Input Element --- */
+.wsf_m3_text_field input[type="text"],
+.wsf_m3_text_field input[type="email"],
+.wsf_m3_text_field select {
+    width: 100%;
+    height: 56px;
+    padding: 16px;
+    border: 1px solid var(--wsf-m3-outline);
+    border-radius: 4px;
+    background-color: transparent;
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--wsf-m3-on-surface);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+    appearance: none; /* Remove native dropdown arrow for styling if needed */
+}
+
+/* Input Focus State */
+.wsf_m3_text_field input:focus,
+.wsf_m3_text_field select:focus {
+    outline: none;
+    border-color: var(--wsf-m3-primary);
+    border-width: 2px;
+    padding: 15px; /* Adjust padding to prevent layout shift from border width change */
+    box-shadow: none;
+}
+
+/* --- Floating Label --- */
+.wsf_m3_text_field label {
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    padding: 0 4px;
+    background-color: var(--wsf-m3-surface); /* Covers the border */
+    color: var(--wsf-m3-on-surface-variant);
+    font-size: 16px;
+    transition: all 0.2s ease-out;
+    pointer-events: none; /* Click goes through to input */
+}
+
+/* Floating Action: When focused OR has content (placeholder trick) */
+.wsf_m3_text_field input:focus + label,
+.wsf_m3_text_field input:not(:placeholder-shown) + label,
+.wsf_m3_text_field select:focus + label,
+.wsf_m3_text_field select:not([value=""]) + label {
+    top: -10px;
+    left: 12px;
+    font-size: 12px;
+    color: var(--wsf-m3-primary);
+    font-weight: 500;
+}
+
+/* --- Error States --- */
+.wsf_m3_text_field.wsf_has_error input {
+    border-color: var(--wsf-m3-error);
+}
+
+.wsf_m3_text_field.wsf_has_error input:focus {
+    border-color: var(--wsf-m3-error);
+}
+
+.wsf_m3_text_field.wsf_has_error label {
+    color: var(--wsf-m3-error);
+}
+
+.wsf_error_message {
+    color: var(--wsf-m3-error);
+    font-size: 12px;
+    margin-top: 4px;
+    margin-left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wsf_error_message .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+/* --- Description / Supporting Text --- */
+.wsf_m3_supporting_text {
+    font-size: 12px;
+    color: var(--wsf-m3-on-surface-variant);
+    margin-top: 4px;
+    margin-left: 16px;
+}
+
+/* --- Grid Adjustments for ZipCity --- */
+.wsf_m3_row {
+    display: flex;
+    gap: 16px;
+}
+
+/* =========================================
+   SKELETON LOADER (M3 Shimmer)
+   ========================================= */
+@keyframes wsf_m3_shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.wsf_skeleton {
+    /* M3 Surface Container -> Surface -> Surface Container Verlauf */
+    background: linear-gradient(90deg,
+    var(--wsf-m3-sys-surface-container) 25%,
+    #FFFFFF 50%,
+    var(--wsf-m3-sys-surface-container) 75%
+    );
+    background-size: 200% 100%;
+    animation: wsf_m3_shimmer 2s infinite linear;
+    border-radius: 4px; /* M3 Standard Radius für Text */
+    display: block;
+    opacity: 0.7;
+}
+
+/* Formen */
+.wsf_skeleton_circle {
+    border-radius: 50%;
+    width: 40px; height: 40px; /* Match Avatar Size */
+    flex-shrink: 0;
+}
+
+.wsf_skeleton_text {
+    height: 14px; /* Match font-size approximate */
+    margin-bottom: 6px;
+    width: 100%;
+}
+
+.wsf_skeleton_text:last-child { margin-bottom: 0; }
+.wsf_w_60 { width: 60% !important; }
+
+/* =========================================
+   PAGINATION: ROWS PER PAGE (Clean Outlined Style)
+   ========================================= */
+
+.wsf_pagination_wrapper{
+    display: flex;
+    justify-content: start;
+}
+
+/* Der Container für Label & Select */
+.wsf_pagination_rows_selector {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-right: 1rem; /* Schiebt den Rest nach rechts, falls Flex-Container */
+}
+
+/* Das Label */
+.wsf_pagination_rows_selector label {
+    font-family: Roboto, sans-serif;
+    font-size: 0.875rem; /* 14px */
+    color: #49454F; /* M3 Text Gray */
+    margin: 0;
+    white-space: nowrap;
+}
+
+/* Das Select-Feld selbst */
+.wsf_pagination_select {
+    /* 1. Browser-Styles killen */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    /* 2. Box Model (Maße aus dem Bild) */
+    height: 32px;
+    min-width: 60px;
+    padding: 0 32px 0 12px; /* Rechts Platz für Pfeil, Links Text */
+    margin: 0;
+
+    /* 3. Look (Rahmen, Hintergrund, Schrift) */
+    background-color: #ffffff;
+    border: 1px solid #79747E; /* Dunkles Grau (Outline) */
+    border-radius: 4px; /* Leicht abgerundet */
+
+    font-family: Roboto, sans-serif;
+    font-size: 0.875rem;
+    color: #1D1B20;
+    line-height: 1.5;
+    cursor: pointer;
+
+    /* 4. Das Dreieck (SVG Data URI) - Exakt wie im Bild */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%225%22%20viewBox%3D%220%200%2010%205%22%3E%3Cpath%20fill%3D%22%2349454F%22%20d%3D%22M0%200l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center; /* 10px von rechts */
+    background-size: 10px 5px;
+
+    transition: border-color 0.2s ease;
+}
+
+/* Hover-Effekt */
+.wsf_pagination_select:hover {
+    border-color: #1D1B20; /* Schwarz bei Hover */
+}
+
+/* Focus-Effekt (Blaue Linie entfernen, Outline setzen) */
+.wsf_pagination_select:focus {
+    outline: none;
+    border-color: var(--wsf-m3-primary, #6750A4); /* Deine Primärfarbe */
+    border-width: 2px;
+    padding-left: 11px; /* Layout-Shift verhindern wegen 2px Border */
+}
+
+/* =========================================
+   PAGINATION: NAVIGATION ACTIONS (Right Side)
+   ========================================= */
+
+/* Der Container für Text und Buttons */
+.wsf_pagination_nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem; /* Kleiner Abstand zwischen den Buttons */
+    color: #49454F; /* M3 Gray */
+    font-family: Roboto, sans-serif;
+    font-size: 0.875rem;
+}
+
+/* Der Text "1-3 of 18" */
+.wsf_pagination_text {
+    margin-right: 20px; /* Abstand zu den Pfeilen */
+    white-space: nowrap;
+    color: #1D1B20; /* Etwas dunklerer Text */
+}
+
+/* Die runden Icon-Buttons */
+.wsf_icon_btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; /* M3 Standard Touch Target */
+    height: 40px;
+    border-radius: 50%; /* Kreisrund */
+    border: none;
+    background-color: transparent;
+    color: #49454F; /* Icon Farbe */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 0;
+}
+
+/* Hover Effekt (Grauer Kreis) */
+.wsf_icon_btn:hover {
+    background-color: rgba(29, 27, 32, 0.08);
+    color: #1D1B20;
+}
+
+/* Disabled State (Ausgegraut) */
+.wsf_icon_btn:disabled {
+    color: rgba(29, 27, 32, 0.38); /* 38% Opacity */
+    cursor: default;
+    background-color: transparent;
+}
+
+/* SVG Styling innerhalb der Buttons */
+.wsf_icon_btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor; /* Erbt die Textfarbe */
+}
+
+/* =========================================
+   COMPONENT: M3 SEARCH BAR
+   ========================================= */
+
+.wsf_m3_search_bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 400px; /* Optional: Maximale Breite begrenzen */
+    height: 48px; /* M3 Standard Höhe (oder 56px) */
+    padding: 0 4px 0 16px; /* Links Platz für Text, Rechts Platz für Button */
+
+    /* M3 Style: Surface Container High (etwas dunkler als Background) */
+    background-color: var(--wsf-m3-sys-surface-container);
+    border-radius: 24px; /* Pill Shape (Hälfte der Höhe) */
+
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Hover State (Elevation Level 1 andeuten) */
+.wsf_m3_search_bar:hover {
+    background-color: #E6E1E5; /* Hardcoded Fallback oder Variable definieren */
+    /* Falls du keine "Highest" Variable hast, nutzen wir einfach eine leichte Abdunklung via Box-Shadow */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Focus State (Active) */
+.wsf_m3_search_bar:focus-within {
+    background-color: var(--wsf-m3-sys-surface); /* Wird heller/weiß */
+    box-shadow: 0 0 0 2px var(--wsf-m3-primary); /* Focus Ring */
+}
+
+/* Das Input Feld selbst (Unsichtbar, füllt den Raum) */
+.wsf_m3_search_input {
+    flex-grow: 1;
+    height: 100%;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0 8px; /* Abstand zu Icon und Button */
+
+    font-family: Roboto, sans-serif;
+    font-size: 1rem;
+    color: var(--wsf-m3-on-surface);
+    outline: none; /* Outline macht der Container */
+}
+
+/* Placeholder Farbe */
+.wsf_m3_search_input::placeholder {
+    color: var(--wsf-m3-on-surface-variant);
+    opacity: 1;
+}
+
+/* Leading Icon (Lupe) */
+.wsf_m3_search_leading_icon {
+    color: var(--wsf-m3-on-surface-variant);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Search Button (Trailing) */
+.wsf_m3_search_btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: transparent; /* Transparent im Ruhezustand */
+    color: var(--wsf-m3-on-surface-variant);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.wsf_m3_search_btn.wsf_disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.wsf_m3_search_btn:hover {
+    background-color: rgba(29, 27, 32, 0.08); /* State Layer */
+    color: var(--wsf-m3-on-surface);
+}
+
+.wsf_m3_search_btn .dashicons {
+    font-size: 20px;
+}

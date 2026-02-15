@@ -1,0 +1,183 @@
+Kreiere AJAX method im orderController, für rest api, mit dem Namen getStripeIntent. Diese soll params verarbeiten, hier beispiel:
+
+```php
+   $metaData = [];
+$metaData['currency_code'] =  xxx;
+$metaData['total_value'] =  xxx;
+$metaData['items_total_value'] = xxx;
+$metaData['shipping'] = xxx;
+```
+
+
+$params = [
+	'currency' => $currency,
+	'amount' => $amount,
+	//'amount' => '1000',// 1 = 0.01
+	//'description' => 'Description here',
+//	'off_session' => 'true',
+	//'confirm' => 'true',
+	//'setup_future_usage' => 'off_session',// so customer id can be attached later to  payment method
+	'metadata' => $metaData
+];
+
+```php
+curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+curl_setopt($ch, CURLOPT_USERPWD, $secret . ':' . '');
+
+$headers = array();
+$headers[] = 'Content-Type: application/x-www-form-urlencoded';
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+$result = json_decode(curl_exec($ch),true);
+if (curl_errno($ch)) {
+	$StripeError = 'Error:' . curl_error($ch);
+}else{
+	if(!empty($result['error']['message'])){
+		$StripeError = 'Error:' . $result['error']['message'];
+	}else{
+		$StripePiId = $result['id'];
+		$StripePiKey = $result['client_secret'];
+	}
+}
+
+curl_close($ch);
+```
+enque script `https://js.stripe.com/v3/` soll geladen werden.
+
+Zusätzlich soll über den PayPal und Stripe elementen eingabe formular geladen werden welches bei einem stripe kauf versandt wird. Dieses eingabe formular enthält folgende felder:
+country: DE, AC, CH,  vorerst
+firstName, lastName, company, addressLine1, addressLine2, city, postalCode, vatNumber (diese Felder sollen auch bei wsf_orders table angelegt werden).
+Diese Felder sollen auch zu OrderController createAction gepostet und verarbeitet werden auch wenn user mit PayPal bezahlt hat.
+Statt paypalData, soll ws.forms.controller.order.events.orderData weitergeleitet werden an `processOrderBackend`
+
+Es soll Order/Functions.js agelegt werden mit
+`ws.forms.controller.order.functions` object
+
+Nach dem ajax `getStripeIntentAction`
+
+sollen erstmal alle vorhandenen daten aus eingabe formular, wie firstName und so weiter
+in dem object ws.forms.controller.order.events.orderData = {....} zusammengefasst werden
+ws.forms.controller.order.events.orderData.stripepiid = response.stripepiid;
+ws.forms.controller.order.events.orderData.stripepikey = response.stripepikey;
+
+ Dann in der jeweiligen indexeddb zu stripe abgespeichert werden.
+
+ws.forms.controller.order.functions.addToStripeIndexedDb(stripepiid,ws.forms.controller.order.events.orderData);
+
+danach soll stripe geladen werden
+var stripe = Stripe('`StripeSandboxClientId`', {
+    //apiVersion: '2020-08-27',
+});
+
+hier soll die stripe form eingebaut werden, schreibe aber nicht camel case sondern mit wsf_.... so wie wir bis jetzt auch alle ids und klassen schreiben
+    '<form id="wsfEcommerceStripePaymentForm" >' +
+        '<div id="wsfEcommerceStripeAuthenticationElement">' +
+
+        '</div>' +
+        '<div id="wsfEcommerceStripePaymentElement">' +
+
+        '</div>' +
+        '<button role="submit" id="wsfEcommerceStripePaymentButton" class="cg_visibility_hidden" >' +
+            'Pay now' +
+        '</button>' +
+    '</form>' +
+'</div>' +
+
+danach sollen die stripe elemente in den wsfEcommerceStripePaymentForm geladen werden
+der form soll in dem modal erscheinen unter dem paypal button, wenn auf warenkorb gedrückt wird
+
+var loader = 'always'
+var elements = stripe.elements({ stripepikey, loader });
+var paymentElement = elements.create('payment');
+paymentElement.mount('#.....');
+
+const linkAuthenticationElement = elements.create("linkAuthentication",{
+    defaultValues: {
+        email: '',
+    }
+});
+
+linkAuthenticationElement.on('change', (event) => {
+    ws.forms.controller.order.events.orderData.StripeEmail = event.value.email;
+ws.forms.controller.order.functions.putToStripeIndexedDb(stripepiid,ws.forms.controller.order.events.orderData);
+});
+
+var form = document.getElementById('wsfEcommerceStripePaymentForm');
+let submitted = false;
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Disable double submission of the form
+    if(submitted) { return; }
+    submitted = true;
+    form.querySelector('button').disabled = true;
+
+    stripe.confirmPayment({
+        elements,
+        confirmParams: {
+            // Return URL where the customer should be redirected after the PaymentIntent is confirmed.
+            return_url: window.location.href = window.location.origin + '/order',
+        },
+        redirect: 'if_required',
+        cancel_url: location.href,
+    })
+        .then(function(result) {
+            console.log('result');
+            console.log(result);
+            $cgEcommerceStripePaymentButton.removeClass('cg_skeleton_loader');
+
+            if (result.error && result.error.type == 'validation_error') {
+                // show error
+            }else if (result.error) {
+                // show error
+            }else{
+                if(result.paymentIntent
+                    && result.paymentIntent
+                        .status == 'succeeded'){
+                    // if redirect not done then processOrderBackend will be executed with stripe and ws.forms.controller.order.events.orderData
+                    // if payed via paypal then processOrderBackend with paypal and ws.forms.controller.order.events.orderData
+                }
+                form.querySelector('button').disabled = false;
+                submitted = false;
+            }
+        });
+
+});
+
+Sollte Stripe die window.location.href = window.location.origin + '/order' logik verwenden
+
+dann wird stripe ?payment_intent=... and die url anhängen
+stripepiid = `$_GET['payment_intent']`
+soll dann in OrderCotroller showAction verarbeitet werden.
+Es soll dann im Order.php ein großer loader angezeigt werden.
+Via JavaScript dann
+ws.forms.controller.order.events.orderData = ws.forms.controller.order.functions.getFromStripeIndexedDb(stripepiid);
+geholt werden und dann via processOrderBackend($,ws.forms.controller.order.events.orderData) verarbeitet werden.
+Danach wird die url mit ws_order shortcode nochmal neugeladen wie bis jetzt auch
+window.location.href = window.location.origin + '/order/?order_id=' + response.order_id;
+und die Order/Show.php mit der order ganz normal angezeigt.
+
+In OrderController `createAction` soll allgemein jetzt auch eine wp_mail ausgeführt werden, als bestellbestätigung.
+Nutze entweder die payer `email_address` when paypal (siehe paypal docu, paypal gibt email_address zurück) oder die ws.forms.controller.order.events.orderData.StripeEmail when stripe.
+
+ersetze das hier bei OrderController createAction
+#toDo stripe verifizierung trotzdem hier noch einbauen
+// Stripe Verifizierung (vereinfacht, da confirmPayment schon im Frontend erfolgreich war)
+$customerEmail = $orderData['StripeEmail'] ?? '';
+baue folgendes ein:
+$ch = curl_init();
+
+curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/'.$StripePiId);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_USERPWD, $secret . ':' . '');
+verbessere den curl wenn notwendig, mach platzhalter für secret.
+
+Baue noch folgendes ein:
+1.
+Cleanup (Aufräumen): Sobald die Bestellung im OrderController::createAction erfolgreich verarbeitet wurde und der User die finale order_id Bestätigungsseite sieht, solltest du den Eintrag aus der IndexedDB löschen (store.delete(stripepiid)). Das hält den Browserspeicher sauber.
+2.
+Ablaufdatum (Optional): Da IndexedDB-Daten nicht automatisch ablaufen, könntest du beim Speichern einen Zeitstempel hinzufügen und beim Laden prüfen, ob die Daten z. B. älter als 24 Stunden sind, um veraltete Fragmente zu ignorieren.

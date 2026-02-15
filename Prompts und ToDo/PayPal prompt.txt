@@ -1,0 +1,51 @@
+Hier ist der Prompt, den du mir geschrieben hast, um das PayPal-Processing anzulegen:
+
+---
+
+Ich möchte PayPal checkout einbauen bei Product/ListFrontend.php. Es soll ein "in den Warenkorb button" geben, statt edit button. Über der Suche soll es ein Warenkorb Button geben. Beim Klicken des Warenkorb buttons soll sich ein Modal öffnen. In diesem Modal soll gelistet werden die Produkte die vorher aus der Liste via "In den Warenkorb button" ausgewählt worden sind. Es soll PayPal Button vai PayPal URL angezegit werden. Nutze den pubic sandbox key hier: xxxx
+Wenn dann Order gemacht wird rest api order/create und createAction im OrderController verarbeitet werden. Diese Soll Order mit den entsprchenden wsf_order_items anlegen und die Order soll via PayPal PHP verabeitet werden. Nimm dazu diesen sandbox secret key hier: xxxx
+Die PayPal order soll im frontend kreiert werden
+```ecmascript 6
+// https://developer.paypal.com/sdk/js/reference/
+paypal.Buttons({
+    style: {
+        color: 'gold'
+    },
+    onClick(data, actions)  {
+        // will be executed in ecommerce-show-checkout via iteration
+    },
+    onInit(data, actions)  {
+
+        // will be executed in ecommerce-show-checkout via iteration
+    },
+    // Sets up the transaction when a payment button is clicked
+    createOrder: (data, actions) => {
+        return actions.order.create('orderData here');
+    },
+    // Finalize the transaction after payer approval
+    onApprove: function(data, actions) {
+        return actions.order.capture().then(function(orderData) {
+        });
+    },
+    onCancel: function (data) {
+
+    },
+    onError: function(data, actions) {
+
+        // onError is only triggered when there is a technical problem with loading or using the buttons, which is a very rare situation. It is not triggered for card processing problems.
+        console.log('onError');
+    }
+}).render('....');
+```
+
+Dann im Backend in der OrderController createAction verarbeitet werden.
+Mit curl soll der token kreiert werden
+https://api.sandbox.paypal.com/v1/oauth2/token
+und dann die paypal order geholt werden
+$url = "https://api-m.sandbox.paypal.com/v2/checkout/orders/".$id;
+Wenn die PayPal order existiert soll dann eben bei wsf_orders die order anelegt werden und wsf_order_items kreiert werden.
+Die Frotnend JavaScript Logic soll im Js/Controller/Order/Events.js verarbeitet werden.
+Nach erfolgreicher bestelllung via rest api order/show/$id via Ajax das Template geladen werden und die gerenderte ListFrontend.php durch das OrderController showAction Show.php ersetzt werden.
+Los gehts, leg alle files an die nontwendig sind und führe alle notwendigen änderungen durch.
+
+---
