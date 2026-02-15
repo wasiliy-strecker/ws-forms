@@ -1,0 +1,38 @@
+Um sicherzustellen, dass die AI (wie GPT-4o-mini) zuverlässig valides JSON liefert, kombiniert man am besten drei Techniken: den System-Prompt, den JSON-Mode und Few-Shot Prompting (Beispiele).
+Hier ist das Beispiel, wie der Prompt intern aufgebaut wird, um die von dir genannte Anfrage ("Schmuckkette", "23324432", 20€, 19% Steuer) perfekt zu verarbeiten.
+1. Der System-Prompt (Die "Programmierung" der AI)
+Dieser Teil sagt der AI, wer sie ist und wie sie sich strikt zu verhalten hat.
+Du bist ein Daten-Extraktor. Deine Aufgabe ist es, Produktbeschreibungen in ein valides JSON-Objekt umzuwandeln.
+Halte dich strikt an dieses Schema:
+{
+  "title": "String",
+  "sku": "String",
+  "price": "String (Format: 0.00)",
+  "tax_rate": "String (Format: 0.00)",
+  "status": "active"
+}
+
+WICHTIG:
+- Nutze für den Preis IMMER einen Punkt als Dezimaltrenner.
+- Entferne Währungssymbole wie €.
+- Gib NUR das JSON-Objekt zurück, keinen einleitenden Text oder Erklärungen.
+2. Der User-Prompt (Die eigentliche Eingabe)
+Das ist das, was der User im Formular eingibt.
+Erstelle ein Produkt mit Titel "Schmuckkette", Bestellnummer "23324432", 20€ preis und 19% steuer.
+3. Das Ergebnis (Die Antwort der AI)
+Durch die Kombination aus dem System-Prompt und dem aktivierten response_format: { "type": "json_object" } (den wir im Code eingebaut haben), wird die AI exakt dies zurückgeben:
+{
+  "title": "Schmuckkette",
+  "sku": "23324432",
+  "price": "20.00",
+  "tax_rate": "19.00",
+  "status": "active"
+}
+Warum das so sicher funktioniert:
+1.
+JSON-Mode: Durch den Parameter response_format => ['type' => 'json_object'] prüft OpenAI bereits vor der Auslieferung der Antwort, ob es valides JSON ist. Wenn nicht, würde die AI intern korrigieren.
+2.
+Modellwahl: gpt-4o-mini ist darauf optimiert, Anweisungen in System-Prompts extrem genau zu folgen (Instruction Following).
+3.
+Temperatur 0.0: Im Code haben wir die temperature auf 0.0 gesetzt. Das macht die AI "berechenbar" und verhindert, dass sie anfängt zu "plaudern" oder das Format kreativ abzuwandeln.
+Wenn ein User also sagt: "Ich hab hier ne Kette für zwanzig Euro, Nummer ist 23324432, nenn sie Schmuckkette und pack 19 prozent steuer drauf", wird die AI trotzdem das gleiche saubere JSON liefern wie oben.

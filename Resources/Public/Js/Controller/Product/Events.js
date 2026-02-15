@@ -43,6 +43,55 @@ ws.forms.controller.product.events = {
             frame.open();
         });
 
+        // AI Analyse Event
+        $wsf_main.on('click', '#wsf_ai_analyze_btn', function(e) {
+            e.preventDefault();
+            var prompt = $('#wsf_ai_prompt').val().trim();
+            if (prompt.length === 0) {
+                alert('Bitte gib eine Beschreibung ein.');
+                return;
+            }
+
+            var $btn = $(this);
+            var $status = $('#wsf_ai_status');
+            ws.forms.functions.toggleSubmitButtonLoader($btn, true);
+            $status.text('AI analysiert...');
+
+            $.ajax({
+                url: wsf_rest.api_url + '/product/ai-analyze',
+                method: 'POST',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', wsf_rest.nonce);
+                },
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ prompt: prompt })
+            })
+                .done(function(response) {
+                    if (response.product) {
+                        var p = response.product;
+                        if (p.title) $('#wsf_product_title').val(p.title).trigger('change');
+                        if (p.sku) $('#wsf_product_sku').val(p.sku).trigger('change');
+                        if (p.price) $('#wsf_product_price').val(p.price).trigger('change');
+                        if (p.tax_rate) $('#wsf_product_tax').val(p.tax_rate).trigger('change');
+                        // Status falls vorhanden
+                        $status.text('Vorschlag übernommen!');
+                    } else {
+                        $status.text('Fehler: Ungültige Antwort von AI.');
+                    }
+                })
+                .fail(function(jqXHR) {
+                    var msg = 'Fehler bei der AI Analyse.';
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                        msg = jqXHR.responseJSON.message;
+                    }
+                    $status.text(msg);
+                    alert(msg);
+                })
+                .always(function() {
+                    ws.forms.functions.toggleSubmitButtonLoader($btn, false);
+                });
+        });
+
         // Formular-Submit für New und Edit
         $wsf_main.on('submit', '#wsf_form_product_new,#wsf_form_product_edit', function(e) {
             e.preventDefault();

@@ -13,6 +13,7 @@ class OptionRepository {
         // 2. Parameter ist der Default-Wert, falls Option noch nicht existiert
         $options->userBackendRole = get_option('wsf_option_user_backend_role', 'administrator');
         $options->userFrontendRole = get_option('wsf_option_user_frontend_role', 'subscriber');
+        $options->openaiApiKey = get_option('wsf_option_openai_api_key', '');
 
         return $options;
     }
@@ -23,9 +24,10 @@ class OptionRepository {
     public function update(Option $options): bool {
         $success1 = update_option('wsf_option_user_backend_role', $options->userBackendRole);
         $success2 = update_option('wsf_option_user_frontend_role', $options->userFrontendRole);
+        $success3 = update_option('wsf_option_openai_api_key', $options->openaiApiKey);
 
         // Gibt true zurück, wenn mindestens einer der Werte aktualisiert wurde
-        return $success1 || $success2;
+        return $success1 || $success2 || $success3;
     }
 
     /**

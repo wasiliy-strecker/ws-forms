@@ -187,4 +187,73 @@ class ProductController extends BaseController {
             'message' => $exists ? 'Diese SKU ist bereits vergeben.' : 'SKU ist verfügbar.'
         ], 200);
     }
+
+    /**
+     * Analysiert einen Benutzer-Prompt via OpenAI und gibt Produktdaten zurück.
+     */
+    public function aiAnalyzeAction(\WP_REST_Request $request): \WP_REST_Response {
+        $params = $this->getParams($request);
+        $prompt = $params['prompt'] ?? '';
+
+        if (empty($prompt)) {
+            return new \WP_REST_Response(['message' => 'Prompt fehlt.'], 400);
+        }
+
+        $optionRepository = new \Ws\WsForms\Domain\Repository\OptionRepository();
+        $options = $optionRepository->get();
+        $apiKey = $options->openaiApiKey;
+
+        if (empty($apiKey)) {
+            return new \WP_REST_Response(['message' => 'OpenAI API Key ist nicht konfiguriert.'], 400);
+        }
+
+        $systemPrompt = "Du bist ein Assistent, der Benutzereingaben in strukturierte Produktdaten für einen Online-Shop umwandelt. 
+        Du MUSST ein valides JSON-Objekt zurückgeben, das genau die folgenden Felder enthält:
+        - title (String): Der Name des Produkts.
+        - sku (String): Eine eindeutige Artikelnummer (wenn nicht vom Benutzer genannt, generiere eine passende kurze SKU).
+        - price (String): Der numerische Preis (nutze einen Punkt als Dezimaltrenner, z.B. '19.99').
+        - tax_rate (String): Der Steuersatz als Zahl (Standard '19.00').
+        - status (String): Immer 'active'.
+
+        WICHTIG: Gib NUR das JSON-Objekt zurück, keinen weiteren Text.";
+
+        $response = wp_remote_post('https://api.openai.com/v1/chat/completions', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type'  => 'application/json',
+            ],
+            'timeout' => 30,
+            'body'    => json_encode([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'response_format' => ['type' => 'json_object'],
+                'temperature' => 0.0,
+            ]),
+        ]);
+
+        if (is_wp_error($response)) {
+            return new \WP_REST_Response(['message' => 'Fehler bei der Kommunikation mit OpenAI: ' . $response->get_error_message()], 500);
+        }
+
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        $content = $body['choices'][0]['message']['content'] ?? '';
+
+        if (empty($content)) {
+            return new \WP_REST_Response(['message' => 'Keine Antwort von der AI erhalten.'], 500);
+        }
+
+        $productData = json_decode($content, true);
+
+        if (!$productData) {
+            return new \WP_REST_Response(['message' => 'Die AI hat kein gültiges JSON zurückgegeben.', 'raw' => $content], 500);
+        }
+
+        return new \WP_REST_Response([
+            'product' => $productData,
+            'message' => 'Vorschlag generiert.'
+        ], 200);
+    }
 }

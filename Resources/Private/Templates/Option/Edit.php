@@ -73,6 +73,22 @@
                     </p>
                 </td>
             </tr>
+
+            <tr>
+                <th scope="wsf_row">
+                    <label for="wsf_option_openai_api_key">OpenAI API Key</label>
+                </th>
+                <td class="wsf_input_box">
+                    <div class="wsf_m3_text_field">
+                        <input type="password" name="wsf_option[openai_api_key]" id="wsf_option_openai_api_key" 
+                               value="<?php echo esc_attr($option->openaiApiKey); ?>" class="wsf_form_control">
+                        <label for="wsf_option_openai_api_key">OpenAI API Key</label>
+                    </div>
+                    <p class="wsf_m3_supporting_text">
+                        API Key für die Kommunikation mit ChatGPT (wird für AI Produkt-Erstellung genutzt).
+                    </p>
+                </td>
+            </tr>
             </tbody>
         </table>
 

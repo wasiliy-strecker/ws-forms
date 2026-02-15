@@ -301,6 +301,13 @@ class Init {
                     'callback' => [$controller, 'checkSkuAction'],
                     'permission_callback' => [$this, 'checkPermission'],
                 ]);
+
+                // Route für AI-Analyse
+                register_rest_route('ws-forms/v1', '/' . $module . '/ai-analyze', [
+                    'methods'  => 'POST',
+                    'callback' => [$controller, 'aiAnalyzeAction'],
+                    'permission_callback' => [$this, 'checkPermission'],
+                ]);
             }
             if($module === 'order'){
                 register_rest_route('ws-forms/v1', '/' . $module . '/get-stripe-intent', [
