@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Ws Forms MVC
- * Description: Professionelles MVC Plugin nach TYPO3-Vorbild.
+ * Plugin Name: Wasiliy Strecker Forms (WS Forms)
+ * Description: Wasiliy Strecker Forms Model View Controller. Experimental WordPress plugin with various features for testing purposes. The architecture generally follows a TYPO3 extension structure.
+ * Author: Wasiliy Strecker
  * Version: 1.0.0
- * Author: Ws
  */
 
 if (!defined('ABSPATH')) exit;
