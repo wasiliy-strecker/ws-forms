@@ -10,66 +10,52 @@ class ProductController extends BaseController {
      */
     protected $productModel = null;
 
+    /**
+     * @var \Ws\WsForms\ControllerHelper\ProductHelper
+     */
+    protected $productHelper = null;
+
     public function __construct() {
         parent::__construct();
-        // Falls du ein Model für Default-Werte wie getLimitToShow() hast:
         $this->productModel = new \Ws\WsForms\Domain\Model\Product();
+        $this->productHelper = new \Ws\WsForms\ControllerHelper\ProductHelper();
     }
 
-    /**
-     * Listet alle Produkte auf (Backend & Frontend)
-     */
-    public function listAction($request = null) {
+    public function listBeAction($request = null) {
         $params = $request instanceof \WP_REST_Request ? $this->getParams($request) : $_GET;
-        $searchQuery = !empty($params['wsf_search']) ? sanitize_text_field($params['wsf_search']) : '';
-
-        // Pagination
-        $currentPage = isset($params['wsf_page']) ? max(1, intval($params['wsf_page'])) : 1;
-        $limit = $this->productModel->getLimitToShow();
-        $offset = ($currentPage - 1) * $limit;
-
-        $repository = new ProductRepository();
-
-        if (!empty($searchQuery)) {
-            $products = $repository->searchProducts($searchQuery, $limit, $offset);
-            $totalProducts = $repository->countSearchProducts($searchQuery);
-        } else {
-            $products = $repository->findAllProducts($limit, $offset);
-            $totalProducts = $repository->countAllProducts();
+        $data = $this->productHelper->getPreparedProductListData($params);
+        foreach ($data as $key => $value) {
+            $this->assign($key, $value);
         }
-
-        // Berechnung für View
-        $totalPages = ceil($totalProducts / $limit);
-        $startEntry = ($totalProducts > 0) ? $offset + 1 : 0;
-        $endEntry   = min($offset + $limit, $totalProducts);
-
-        $this->assign('products', $products);
-        $this->assign('headline', 'Produktverwaltung');
-        $this->assign('message', $params['message'] ?? null);
-
-        // Pagination Variablen
-        $this->assign('currentPage', $currentPage);
-        $this->assign('totalPages', $totalPages);
-        $this->assign('totalUsers', $totalProducts); // Konsistent zum User-Template-Namen oder totalProducts
-        $this->assign('startEntry', $startEntry);
-        $this->assign('endEntry', $endEntry);
-        $this->assign('limit', $limit);
-        $this->assign('isAdmin', $this->base->getIsAdmin());
 
         if ($request instanceof \WP_REST_Request) {
-            $viewPath = $this->base->getIsAdmin() ? '/Product/../../Partials/Product/TableRows' : '/Product/../../Partials/Product/ListRowsFrontend';
             return new \WP_REST_Response([
-                'html' => $this->renderView($viewPath),
-                'pagination' => !$this->base->getIsAdmin() ? $this->renderView('/Product/../../Partials/Product/PaginationFrontend') : ''
+                'html' => $this->renderPartial('Product/TableRows'),
+                'pagination' => ''
             ], 200);
         }
-        return $this->renderView($this->base->getIsAdmin() ? 'Product/List' : 'Product/ListFrontend');
+        $this->assign('headline', 'Produktverwaltung');
+        return $this->renderView('Product/List');
     }
 
-    /**
-     * Zeigt das Formular für ein neues Produkt
-     */
-    public function newAction(): string {
+    public function listFeAction($request = null) {
+        $params = $request instanceof \WP_REST_Request ? $this->getParams($request) : $_GET;
+        $data = $this->productHelper->getPreparedProductListData($params);
+        foreach ($data as $key => $value) {
+            $this->assign($key, $value);
+        }
+
+        if ($request instanceof \WP_REST_Request) {
+            return new \WP_REST_Response([
+                'html' => $this->renderPartial('Product/ListRows'),
+                'pagination' => $this->renderPartial('Product/Pagination')
+            ], 200);
+        }
+        $this->assign('headline', 'Produkte');
+        return $this->renderView('Product/List');
+    }
+
+    public function newBeAction(): string {
         $product = new \stdClass();
         $product->id = 0;
         $product->title = '';
@@ -81,7 +67,19 @@ class ProductController extends BaseController {
         $this->assign('product', $product);
         $this->assign('headline', 'Neues Produkt anlegen');
 
-        return $this->renderView($this->base->getIsAdmin() ? 'Product/New' : 'Product/NewFrontend');
+        return $this->renderView('Product/New');
+    }
+
+    public function newFeAction(): string {
+        return $this->newBeAction(); // Usually FE new product form might be different, but for now same.
+    }
+
+    public function createBeAction(\WP_REST_Request $request): \WP_REST_Response {
+        return $this->createAction($request);
+    }
+
+    public function createFeAction(\WP_REST_Request $request): \WP_REST_Response {
+        return $this->createAction($request);
     }
 
     /**
@@ -116,7 +114,7 @@ class ProductController extends BaseController {
 
         $redirectUrl = $this->base->getIsAdmin()
             ? admin_url('admin.php?page=ws_forms_products&message=created')
-            : add_query_arg(['action' => 'list', 'message' => 'created'], home_url('/produkte/'));
+            : add_query_arg(['wsf_action' => 'list', 'message' => 'created'], home_url('/produkte/'));
 
         return new \WP_REST_Response([
             'message' => 'Produkt erfolgreich angelegt!',
@@ -124,11 +122,20 @@ class ProductController extends BaseController {
         ], 200);
     }
 
+    public function editBeAction(): string {
+        return $this->editAction();
+    }
+
+    public function editFeAction(): string {
+        return $this->editAction();
+    }
+
     /**
      * Zeigt das Bearbeitungs-Formular
      */
     public function editAction(): string {
-        $productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        $productId = get_query_var('wsf_id') ?: (isset($_GET['wsf_id']) ? $_GET['wsf_id'] : (isset($_GET['id']) ? $_GET['id'] : 0));
+        $productId = intval($productId);
         $repository = new ProductRepository();
         $product = $repository->getProductById($productId);
 
@@ -140,7 +147,15 @@ class ProductController extends BaseController {
         $this->assign('headline', 'Produkt bearbeiten');
         $this->assign('product', $product);
 
-        return $this->renderView($this->base->getIsAdmin() ? 'Product/Edit' : 'Product/EditFrontend');
+        return $this->renderView('Product/Edit');
+    }
+
+    public function updateBeAction(\WP_REST_Request $request): \WP_REST_Response {
+        return $this->updateAction($request);
+    }
+
+    public function updateFeAction(\WP_REST_Request $request): \WP_REST_Response {
+        return $this->updateAction($request);
     }
 
     /**

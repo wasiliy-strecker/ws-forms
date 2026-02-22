@@ -3,11 +3,6 @@ namespace Ws\WsForms\Controller;
 
 abstract class BaseController{
 
-    // Tells PHP that this functions exists in the child classes
-    abstract public function listAction();
-    abstract public function newAction();
-    abstract public function editAction();
-
     protected $variables = [];
 
     /**
@@ -25,17 +20,24 @@ abstract class BaseController{
     }
 
     public function initAction($atts = []) {
+        $action = get_query_var('wsf_action') ?: (isset($_GET['wsf_action']) ? $_GET['wsf_action'] : 'list');
+        $action = sanitize_text_field($action);
 
-        $action = isset($_GET['action']) ? $_GET['action'] : 'list';
+        $isAdmin = $this->base->getIsAdmin();
+        $suffix = $isAdmin ? 'BeAction' : 'FeAction';
+        $methodName = $action . $suffix;
 
-        if ($action === 'new') {
-            return $this->newAction();
-        }else if ($action === 'edit') {
-            return $this->editAction();
-        }else{
-            return $this->listAction();
+        if (method_exists($this, $methodName)) {
+            return $this->$methodName($atts);
         }
 
+        // Fallback or generic routing if specific Be/Fe doesn't exist
+        $genericMethod = $action . 'Action';
+        if (method_exists($this, $genericMethod)) {
+            return $this->$genericMethod($atts);
+        }
+
+        return $isAdmin ? $this->listBeAction($atts) : $this->listFeAction($atts);
     }
 
     protected function assignGeneralVariables(): void
@@ -47,12 +49,33 @@ abstract class BaseController{
     {
         $this->assignGeneralVariables();
         extract($this->variables);
-        $path = plugin_dir_path(__FILE__) . '../../Resources/Private/Templates/' . $templateName . '.php';
+
+        $context = $this->base->getIsAdmin() ? 'Be' : 'Fe';
+        // Path adjusted: Resources/Private/Templates/[Fe|Be]/[Template][Fe|Be].php
+        $path = plugin_dir_path(__FILE__) . "../../Resources/Private/Templates/{$context}/{$templateName}{$context}.php";
+
         ob_start();
         if (file_exists($path)) {
             include $path;
         } else {
             echo "Template nicht gefunden: $path";
+        }
+        return ob_get_clean();
+    }
+
+    protected function renderPartial($partialName): bool|string
+    {
+        extract($this->variables);
+
+        $context = $this->base->getIsAdmin() ? 'Be' : 'Fe';
+        // Path adjusted: Resources/Private/Partials/[Fe|Be]/[Partial][Fe|Be].php
+        $path = plugin_dir_path(__FILE__) . "../../Resources/Private/Partials/{$context}/{$partialName}{$context}.php";
+
+        ob_start();
+        if (file_exists($path)) {
+            include $path;
+        } else {
+            echo "Partial nicht gefunden: $path";
         }
         return ob_get_clean();
     }

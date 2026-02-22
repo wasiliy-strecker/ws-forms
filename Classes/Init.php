@@ -22,6 +22,12 @@ class Init {
         // Sprachdateien beim 'init' Hook laden
         add_action('init', [$instance, 'loadTextDomain']);
 
+        // Rewrite Rules beim 'init' Hook hinzufügen
+        add_action('init', [$instance, 'addRewriteRules']);
+
+        // Query-Variablen registrieren
+        add_filter('query_vars', [$instance, 'registerQueryVars']);
+
         // REST API IMMER registrieren (außerhalb von is_admin)
         add_action('rest_api_init', [$instance, 'registerRestRoutes']);
 
@@ -40,6 +46,26 @@ class Init {
             add_shortcode('ws_order', [self::class, 'runWsOrderShortcode']);
         }
 
+    }
+
+    /**
+     * Fügt Rewrite Rules für sprechende URLs hinzu
+     */
+    public function addRewriteRules() {
+        add_rewrite_rule(
+            '^ws-forms/([0-9]+)-([^/]+)/?$',
+            'index.php?pagename=ws-forms&wsf_action=edit&wsf_id=$matches[1]',
+            'top'
+        );
+    }
+
+    /**
+     * Registriert zusätzliche Query-Variablen für WordPress
+     */
+    public function registerQueryVars($vars) {
+        $vars[] = 'wsf_action';
+        $vars[] = 'wsf_id';
+        return $vars;
     }
 
     /**
@@ -113,10 +139,15 @@ class Init {
     protected function enqueueScript($handle, $path, $deps = []) {
         // Falls diese Datei in Classes/ liegt, brauchen wir dirname()
         $plugin_url = plugin_dir_url(dirname(__FILE__));
+        $context = is_admin() ? 'Be/' : 'Fe/';
+        $suffix = is_admin() ? 'Be' : 'Fe';
+
+        // Add suffix to path before .js
+        $pathWithSuffix = str_replace('.js', $suffix . '.js', $path);
 
         wp_enqueue_script(
             $handle,
-            $plugin_url . 'Resources/Public/Js/' . $path,
+            $plugin_url . 'Resources/Public/Js/' . $context . $pathWithSuffix,
             $deps,
             '1.0.0',
             true
@@ -136,8 +167,10 @@ class Init {
         $this->enqueueScript('wsf_controller_user_functions_js', 'Controller/User/Functions.js', ['wsf_init_js']);
         $this->enqueueScript('wsf_controller_user_events_js', 'Controller/User/Events.js', ['wsf_init_js']);
 
-        $this->enqueueScript('wsf_controller_option_edit_js', 'Controller/Option/Edit.js', ['wsf_init_js']);
-        $this->enqueueScript('wsf_controller_option_events_js', 'Controller/Option/Events.js', ['wsf_init_js']);
+        if (is_admin()) {
+            $this->enqueueScript('wsf_controller_option_edit_js', 'Controller/Option/Edit.js', ['wsf_init_js']);
+            $this->enqueueScript('wsf_controller_option_events_js', 'Controller/Option/Events.js', ['wsf_init_js']);
+        }
 
         $this->enqueueScript('wsf_controller_product_new_js', 'Controller/Product/New.js', ['wsf_init_js']);
         $this->enqueueScript('wsf_controller_product_edit_js', 'Controller/Product/Edit.js', ['wsf_init_js']);
@@ -152,7 +185,7 @@ class Init {
         $this->enqueueScript('wsf_validation_js', 'Validation.js', ['wsf_init_js']);
 
         wp_localize_script('wsf_init_js', 'wsf_rest', [
-            'api_url' => esc_url_raw(rest_url('ws-forms/v1')),
+            'api_url' => esc_url_raw(rest_url('ws-forms/v1/' . (is_admin() ? 'be' : 'fe'))),
             'nonce'   => wp_create_nonce('wp_rest')
         ]);
 
@@ -243,86 +276,88 @@ class Init {
 
             $controller = new $controllerClass();
 
-            // --- NEU: LOGIN ROUTE (Spezifisch für User-Modul) ---
-            if ($module === 'user') {
-                register_rest_route('ws-forms/v1', '/user/login', [
-                    'methods'  => 'POST',
-                    'callback' => [$controller, 'loginCreateAction'],
-                    // WICHTIG: Erlaubt den Zugriff für nicht-eingeloggte User
-                    'permission_callback' => '__return_true',
-                ]);
-            }
+            // Hier weichen wir zwischen /fe/ und /be/ ab
+            $contexts = ['fe', 'be'];
 
-            register_rest_route('ws-forms/v1', '/' . $module . '/list', [
-                'methods'  => 'GET',
-                'callback' => [$controller, 'listAction'],
-                'permission_callback' => [$this, 'checkPermission'],
-            ]);
+            foreach ($contexts as $ctx) {
+                $suffix = ucfirst($ctx); // Fe or Be
 
-            // 1. CREATE -> /ws-forms/v1/user/create
-            register_rest_route('ws-forms/v1', '/' . $module . '/create', [
-                'methods'  => 'POST',
-                'callback' => [$controller, 'createAction'],
-                'permission_callback' => [$this, 'checkPermission'],
-            ]);
+                // --- LOGIN ROUTE ---
+                if ($module === 'user') {
+                    register_rest_route('ws-forms/v1', '/' . $ctx . '/user/login', [
+                        'methods'  => 'POST',
+                        'callback' => [$controller, 'loginCreateAction'],
+                        'permission_callback' => '__return_true',
+                    ]);
+                }
 
-            // 2. UPDATE -> /ws-forms/v1/user/update/123
-            register_rest_route('ws-forms/v1', '/' . $module . '/update/(?P<id>\d+)', [
-                'methods'  => 'POST',
-                'callback' => [$controller, 'updateAction'],
-                'permission_callback' => [$this, 'checkPermission'],
-                'args' => [
-                    'id' => ['validate_callback' => function($param) { return is_numeric($param); }]
-                ]
-            ]);
-
-            // 3. DELETE -> /ws-forms/v1/user/delete/123
-            register_rest_route('ws-forms/v1', '/' . $module . '/delete/(?P<id>\d+)', [
-                'methods'  => 'DELETE',
-                'callback' => [$controller, 'deleteAction'],
-                'permission_callback' => [$this, 'checkPermission'],
-                'args' => [
-                    'id' => ['validate_callback' => function($param) { return is_numeric($param); }]
-                ]
-            ]);
-
-            if($module === 'user'){
-                // Route für Email-Check -> /ws-forms/v1/user/check-email
-                register_rest_route('ws-forms/v1', '/' . $module . '/check-email', [
+                register_rest_route('ws-forms/v1', '/' . $ctx . '/' . $module . '/list', [
                     'methods'  => 'GET',
-                    'callback' => [$controller, 'checkEmailAction'],
-                    'permission_callback' => [$this, 'checkPermission'],
-                ]);
-            }
-            if($module === 'product'){
-                // Route für Email-Check -> /ws-forms/v1/product/check-sku
-                register_rest_route('ws-forms/v1', '/' . $module . '/check-sku', [
-                    'methods'  => 'GET',
-                    'callback' => [$controller, 'checkSkuAction'],
+                    'callback' => [$controller, 'list' . $suffix . 'Action'],
                     'permission_callback' => [$this, 'checkPermission'],
                 ]);
 
-                // Route für AI-Analyse
-                register_rest_route('ws-forms/v1', '/' . $module . '/ai-analyze', [
+                register_rest_route('ws-forms/v1', '/' . $ctx . '/' . $module . '/create', [
                     'methods'  => 'POST',
-                    'callback' => [$controller, 'aiAnalyzeAction'],
+                    'callback' => [$controller, 'create' . $suffix . 'Action'],
                     'permission_callback' => [$this, 'checkPermission'],
                 ]);
-            }
-            if($module === 'order'){
-                register_rest_route('ws-forms/v1', '/' . $module . '/get-stripe-intent', [
+
+                register_rest_route('ws-forms/v1', '/' . $ctx . '/' . $module . '/update/(?P<id>\d+)', [
                     'methods'  => 'POST',
-                    'callback' => [$controller, 'getStripeIntentAction'],
-                    'permission_callback' => [$this, 'checkPermission'],
-                ]);
-                register_rest_route('ws-forms/v1', '/' . $module . '/show/(?P<id>\d+)', [
-                    'methods'  => 'GET',
-                    'callback' => [$controller, 'showAction'],
+                    'callback' => [$controller, 'update' . $suffix . 'Action'],
                     'permission_callback' => [$this, 'checkPermission'],
                     'args' => [
                         'id' => ['validate_callback' => function($param) { return is_numeric($param); }]
                     ]
                 ]);
+
+                register_rest_route('ws-forms/v1', '/' . $ctx . '/' . $module . '/delete/(?P<id>\d+)', [
+                    'methods'  => 'DELETE',
+                    'callback' => [$controller, 'delete' . $suffix . 'Action'],
+                    'permission_callback' => [$this, 'checkPermission'],
+                    'args' => [
+                        'id' => ['validate_callback' => function($param) { return is_numeric($param); }]
+                    ]
+                ]);
+
+                if($module === 'user'){
+                    register_rest_route('ws-forms/v1', '/' . $ctx . '/' . $module . '/check-email', [
+                        'methods'  => 'GET',
+                        'callback' => [$controller, 'checkEmailAction'],
+                        'permission_callback' => [$this, 'checkPermission'],
+                    ]);
+                }
+
+                if($module === 'product'){
+                    register_rest_route('ws-forms/v1', '/' . $ctx . '/' . $module . '/check-sku', [
+                        'methods'  => 'GET',
+                        'callback' => [$controller, 'checkSkuAction'],
+                        'permission_callback' => [$this, 'checkPermission'],
+                    ]);
+
+                    register_rest_route('ws-forms/v1', '/' . $ctx . '/' . $module . '/ai-analyze', [
+                        'methods'  => 'POST',
+                        'callback' => [$controller, 'aiAnalyzeAction'],
+                        'permission_callback' => [$this, 'checkPermission'],
+                    ]);
+                }
+
+                if($module === 'order'){
+                    register_rest_route('ws-forms/v1', '/' . $ctx . '/' . $module . '/get-stripe-intent', [
+                        'methods'  => 'POST',
+                        'callback' => [$controller, 'getStripeIntentAction'],
+                        'permission_callback' => [$this, 'checkPermission'],
+                    ]);
+                    register_rest_route('ws-forms/v1', '/' . $ctx . '/' . $module . '/show/(?P<id>\d+)', [
+                        'methods'  => 'GET',
+                        'callback' => [$controller, 'show' . $suffix . 'Action'],
+                        'permission_callback' => [$this, 'checkPermission'],
+                        'args' => [
+                            'id' => ['validate_callback' => function($param) { return is_numeric($param); }]
+                        ]
+                    ]);
+                }
             }
         }
 
@@ -566,6 +601,9 @@ class Init {
     ) $charset_collate;";
 
         dbDelta($sql_order_items);
+
+        // Rewrite Rules flashen, damit die neuen URLs sofort funktionieren
+        flush_rewrite_rules();
 
 	}
 

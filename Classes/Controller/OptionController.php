@@ -27,7 +27,7 @@ class OptionController extends BaseController {
         $this->assign('message', $message);
         $this->assign('headline', 'Plugin Option');
         // URL Slug auf ws_forms_option angepasst
-        $this->assign('formAction', admin_url('admin.php?page=ws_forms_option&action=update'));
+        $this->assign('formAction', admin_url('admin.php?page=ws_forms_option&wsf_action=update'));
 
         // Template Pfad angepasst
         echo $this->renderView('Option/Edit');
@@ -47,7 +47,7 @@ class OptionController extends BaseController {
 
         return new \WP_REST_Response([
             'message' => 'Option saved!',
-            'redirect' => admin_url('admin.php?page=ws_forms_options&action=edit&message=updated')
+            'redirect' => admin_url('admin.php?page=ws_forms_options&wsf_action=edit&message=updated')
         ], 200);
 
     }

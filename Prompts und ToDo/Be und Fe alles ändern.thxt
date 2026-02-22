@@ -1,0 +1,9 @@
+Dann Teile folgender maßen alles auf:
+- Ordner sollen heißen, statt Frontend und Backend, Fe und Be
+- actions in controller sollen aufgeteilt werden zwischene fe und be, also listFeAction, listBeAction, editFeAction, editBeAction und so weiter
+- Templates genauso, listFe, listBe und so weiter
+- Mache auch Partials/Be und Partials/Fe und immer mit TableRowsBe oder TableRowsFe endung und so weiter
+- Javascript genaus Js/Be/InitBe.js Js/Be/User/EditBe.js Js/Be/User/FunctionsBe.js und so weiter
+- Rest APIs genauso mache `'ws-forms/v1', '/fe/' . $module . '/create'` und `'ws-forms/v1', '/be/' . $module . '/create'`
+- Erstelle Classes/ControllerHelper Ordner und erstelle Classes/ControllerHelper/UserHelper oder ProductHelper und so weiter für gemeinsame funktionen die in Controller Actions genutzt werden sollen
+- lade je nach dem ob frontend oder backend unterschiedliche JS dateien.

@@ -8,107 +8,82 @@ class UserController extends BaseController {
      */
     protected $user = null;
 
+    /**
+     * @var \Ws\WsForms\ControllerHelper\UserHelper
+     */
+    protected $userHelper = null;
+
     public function __construct() {
         parent::__construct();
         $this->user = new \Ws\WsForms\Domain\Model\User();
+        $this->userHelper = new \Ws\WsForms\ControllerHelper\UserHelper();
     }
 
-    public function listAction($request = null) {
-        // 1. Parameter holen
+    public function listBeAction($request = null) {
         $params = $request instanceof \WP_REST_Request ? $this->getParams($request) : $_GET;
-        $searchQuery = !empty($params['wsf_search']) ? sanitize_text_field($params['wsf_search']) : '';
-
-        // PAGINATION LOGIK:
-        // Aktuelle Seite (Default: 1)
-        $currentPage = isset($params['wsf_page']) ? max(1, intval($params['wsf_page'])) : 1;
-        // Einträge pro Seite (Hier fest auf 3 gesetzt, wie gewünscht, oder aus Params)
-        $limit = $this->user->getLimitToShow();
-        // Offset berechnen (Seite 1 = 0, Seite 2 = 3, etc.)
-        $offset = ($currentPage - 1) * $limit;
-
-        $repository = new \Ws\WsForms\Domain\Repository\UserRepository();
-
-        // 2. Suche oder findAll MIT LIMIT und OFFSET
-        // WICHTIG: Deine Repository-Methoden müssen angepasst werden, um $limit und $offset zu akzeptieren!
-        if (!empty($searchQuery)) {
-            // Holen der "Slice"
-            $users = $repository->search($searchQuery, $limit, $offset);
-            // Holen der GESAMTANZAHL (ohne Limit) für die Berechnung
-            $totalUsers = $repository->countSearch($searchQuery);
-        } else {
-            $users = $repository->findAll($limit, $offset);
-            $totalUsers = $repository->countAll();
+        $data = $this->userHelper->getPreparedUserListData($params);
+        foreach ($data as $key => $value) {
+            $this->assign($key, $value);
         }
 
-        // 3. Adressen Logik (Unverändert)
-        $addressRepository = new \Ws\WsForms\Domain\Repository\AddressRepository();
-        // Performance Tipp: Nur Counts für die geladenen 3 User holen, statt für alle
-        $userIds = array_map(function($u) { return $u->ID; }, $users);
-        $addressCounts = !empty($userIds) ? $addressRepository->getCountByUserIDs($userIds) : [];
-
-        foreach ($users as $user) {
-            $user->address_count = $addressCounts[$user->ID] ?? 0;
-            $user->wsf_first_name = get_user_meta($user->ID, 'wsf_first_name', true);
-            $user->wsf_last_name  = get_user_meta($user->ID, 'wsf_last_name', true);
-        }
-
-        // 4. BERECHNUNG FÜR VIEW (1-3 of 18)
-        $totalPages = ceil($totalUsers / $limit);
-        $startEntry = ($totalUsers > 0) ? $offset + 1 : 0;
-        $endEntry   = min($offset + $limit, $totalUsers);
-
-        // Variablen zuweisen
-        $this->assign('users', $users);
-        $this->assign('message', $params['message'] ?? null);
-
-        // Pagination Variablen zuweisen
-        $this->assign('currentPage', $currentPage);
-        $this->assign('totalPages', $totalPages);
-        $this->assign('totalUsers', $totalUsers);
-        $this->assign('startEntry', $startEntry);
-        $this->assign('endEntry', $endEntry);
-        $this->assign('limit', $limit);
-        $this->assign('isAdmin', $this->base->getIsAdmin());
-
-        // ... Rest bleibt gleich (Render View) ...
         if ($request instanceof \WP_REST_Request) {
-            // Optional: Pagination Meta-Daten im JSON zurückgeben für JS Updates
-            if($this->base->getIsAdmin()){
-                $html = $this->renderView('/User/../../Partials/User/TableRows');
-                $pagination = '';
-            }else{
-                $html = $this->renderView('/User/../../Partials/User/ListRowsFrontend');
-                $pagination = $this->renderView('/User/../../Partials/User/PaginationFrontend');
-            }
-            return new \WP_REST_Response([
-                'html' => $html,
-                'pagination' => $pagination
-            ], 200);
+            $html = $this->renderPartial('User/TableRows');
+            return new \WP_REST_Response(['html' => $html, 'pagination' => ''], 200);
         }
 
-        if ($this->base->getIsAdmin()) {
-            return $this->renderView('User/List');
-        } else {
-            return $this->renderView('User/ListFrontend');
-        }
+        return $this->renderView('User/List');
     }
 
-    public function newAction(): string
+    public function listFeAction($request = null) {
+        $params = $request instanceof \WP_REST_Request ? $this->getParams($request) : $_GET;
+        $data = $this->userHelper->getPreparedUserListData($params);
+        foreach ($data as $key => $value) {
+            $this->assign($key, $value);
+        }
+
+        if ($request instanceof \WP_REST_Request) {
+            $html = $this->renderPartial('User/ListRows');
+            $pagination = $this->renderPartial('User/Pagination');
+            return new \WP_REST_Response(['html' => $html, 'pagination' => $pagination], 200);
+        }
+
+        return $this->renderView('User/List');
+    }
+
+    public function newBeAction(): string
     {
-	    // Ein leeres Objekt erstellen, damit das Template keine "Notice: undefined variable" wirft
-	    $user = new \stdClass();
-	    $user->ID = 0;
-	    $user->user_email = '';
-	    $user->wsf_first_name = '';
-	    $user->wsf_last_name = '';
+        $user = new \stdClass();
+        $user->ID = 0;
+        $user->user_email = '';
+        $user->wsf_first_name = '';
+        $user->wsf_last_name = '';
         $this->assign('user', $user);
         $this->assign('headline', 'Neuen Benutzer anlegen');
 
-        if ($this->base->getIsAdmin()) {
-            return $this->renderView('User/New');
-        } else {
-            return $this->renderView('User/NewFrontend');
-        }
+        return $this->renderView('User/New');
+    }
+
+    public function newFeAction(): string
+    {
+        $user = new \stdClass();
+        $user->ID = 0;
+        $user->user_email = '';
+        $user->wsf_first_name = '';
+        $user->wsf_last_name = '';
+        $this->assign('user', $user);
+        $this->assign('headline', 'Registrieren');
+
+        return $this->renderView('User/New');
+    }
+
+    public function createBeAction(\WP_REST_Request $request): \WP_REST_Response
+    {
+        return $this->createAction($request);
+    }
+
+    public function createFeAction(\WP_REST_Request $request): \WP_REST_Response
+    {
+        return $this->createAction($request);
     }
 
 	public function createAction(\WP_REST_Request $request): \WP_REST_Response
@@ -145,7 +120,7 @@ class UserController extends BaseController {
             $requestedRedirect = $params['current_url'] ?? '';
             $safeUrl = wp_validate_redirect($requestedRedirect, home_url());
             $redirectUrl = add_query_arg([
-                'action'  => 'list',
+                'wsf_action'  => 'list',
                 'message' => 'created'
             ], $safeUrl);
         }
@@ -156,9 +131,20 @@ class UserController extends BaseController {
 		], 200);
 	}
 
-	public function editAction(): string
+    public function editBeAction(): string
     {
-		$userId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        return $this->editAction();
+    }
+
+    public function editFeAction(): string
+    {
+        return $this->editAction();
+    }
+
+    public function editAction(): string
+    {
+		$userId = get_query_var('wsf_id') ?: (isset($_GET['wsf_id']) ? $_GET['wsf_id'] : 0);
+		$userId = intval($userId);
 
 		// Prüfen, ob der User existiert und ob er über dein Plugin erstellt wurde
 		$user = get_user_by('id', $userId);
@@ -180,15 +166,20 @@ class UserController extends BaseController {
 		$this->assign('user', $user);
 		$this->assign('addresses', $addresses); // Adressen an die View übergeben
 
-        if ($this->base->getIsAdmin()) {
-            return $this->renderView('User/Edit');
-        } else {
-            return $this->renderView('User/EditFrontend');
-        }
-
+        return $this->renderView('User/Edit');
 	}
 
-	public function updateAction(\WP_REST_Request $request): \WP_REST_Response
+ public function updateBeAction(\WP_REST_Request $request): \WP_REST_Response
+ {
+     return $this->updateAction($request);
+ }
+
+ public function updateFeAction(\WP_REST_Request $request): \WP_REST_Response
+ {
+     return $this->updateAction($request);
+ }
+
+ public function updateAction(\WP_REST_Request $request): \WP_REST_Response
     {
 		$params = $this->getParams($request);
 		$userId = $params['id'];
