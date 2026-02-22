@@ -1,16 +1,22 @@
-🚀 MASTER-PROMPT: Erstellung des WordPress-Themes "ws-theme" (TYPO3/Extbase-Struktur)
-1. Kontext & Referenz-System: Erstelle ein WordPress-Theme namens ws-theme im Verzeichnis wp-content/themes/ws-theme/. WICHTIG: Nutze das existierende Plugin im Verzeichnis src/wp-content/plugins/ws-forms/ als direkte technische Vorlage. Analysiere dort insbesondere die index.php (Autoloader), Classes/Init.php (Hook-Management) und Classes/Controller/BaseController.php (Rendering-Logik) und übertrage diese bewährten Konzepte auf das neue Theme.
+🚀 MASTER-PROMPT: Erstellung des WordPress-Themes "xxx-theme" (TYPO3-Struktur)
+1. Kontext & Referenz-System: Erstelle ein WordPress-Theme namens xxx-theme im Verzeichnis wp-content/themes/xxx-theme/. WICHTIG: Nutze das existierende Plugin im Verzeichnis src/wp-content/plugins/ws-forms/ als direkte technische Vorlage. Analysiere dort insbesondere die Architektur und Logik, aber ersetze alle markenspezifischen Bezeichnungen:
+•
+Ändere den Namespace von Ws\WsForms\ zu Xxx\XxxTheme\.
+•
+Ändere alle Funktions- und Variablen-Prefixe von wsf_ zu xxx_.
+•
+Ändere alle Theme-spezifischen Datenbank-Optionen auf das Prefix xxx_.
 2. Architektur & Namenskonventionen:
 •
-Namespace: Ws\WsTheme\ (analog zu Ws\WsForms\).
+Namespace: Xxx\XxxTheme\
 •
-Prefix: Verwende durchgehend wst_ (statt wsf_).
+Prefix: Durchgehend xxx_
 •
 Dateisystem (MVC):
 ◦
 Classes/Controller/: Programmsteuerung (Page, Layout, Option).
 ◦
-Classes/ControllerHelper/: Assistenten für Controller (PageHelper, LayoutHelper).
+Classes/ControllerHelper/: Assistenten für Controller.
 ◦
 Classes/Domain/Model/ & Classes/Domain/Repository/: Datenobjekte und Abstraktion.
 ◦
@@ -22,38 +28,38 @@ Resources/Private/: Unterordner Templates, Partials und Layouts (PHP-Views).
 ◦
 Resources/Public/: Css, Js, Images, Fonts.
 ◦
-functions.php: Initialisiert den PSR-4 Autoloader und ruft \Ws\WsTheme\Init::register_services() auf.
+functions.php: Initialisiert den PSR-4 Autoloader und ruft \Xxx\XxxTheme\Init::register_services() auf.
 3. Kern-Funktionalitäten (PHP):
 •
-BaseController: Implementiere die Rendering-Logik aus ws-forms (mit assign(), renderView() und renderPartial()), angepasst auf die Pfad-Struktur eines Themes (get_template_directory()).
+BaseController: Implementiere die Rendering-Logik aus der Plugin-Vorlage (mit assign(), renderView() und renderPartial()), angepasst auf die Pfad-Struktur eines Themes (get_template_directory()).
 •
 Services:
 ◦
 AssetService: Zentrales Management für CSS/JS (Enqueueing).
 ◦
-MenuService: Registrierung und Aufbereitung von WP-Menüs für die Templates.
+MenuService: Registrierung und Aufbereitung von WP-Menüs.
 ◦
 ConfigService: Typsicherer Zugriff auf Theme-Einstellungen (Options API).
 4. Modernes JavaScript (Multi-Instanz-fähig):
 •
-Struktur: JS-Dateien in Resources/Public/Js/Fe/Controller/ (z.B. Page/ListFe.js, Block/HeroFe.js).
+Struktur: JS-Dateien in Resources/Public/Js/Fe/Controller/.
 •
-Dispatcher: Eine InitFe.js, die via Daten-Attributen ([data-wst-controller]) über alle Elemente iteriert und die korrekte init-Funktion aufruft.
+Dispatcher: Eine InitFe.js, die via Daten-Attributen ([data-xxx-controller]) über alle Elemente iteriert und die korrekte init-Funktion aufruft.
 •
-Scope: Jede JS-Action muss so programmiert sein, dass sie mehrere Instanzen desselben Elements/Blocks auf einer Seite unabhängig voneinander steuern kann (Erhalt des Scopes durch Übergabe des jeweiligen jQuery-Elements).
-5. Gutenberg-Integration (Dynamic Blocks): Registriere die Kategorie "WS Theme" und erstelle folgende Blöcke als Dynamic Blocks:
+Scope: Jede JS-Action muss so programmiert sein, dass sie mehrere Instanzen desselben Elements auf einer Seite unabhängig steuern kann.
+5. Gutenberg-Integration (Dynamic Blocks): Registriere die Kategorie "XXX Theme" und erstelle folgende Blöcke als Dynamic Blocks:
 •
 Hero / Stage, Grid / Columns, Teaser / Cards, Icon-Text-Liste, Accordion / FAQ, Testimonial-Slider, Dynamic Post Grid.
 •
-Das Frontend-Rendering der Blöcke erfolgt über die Controller/Template-Struktur. Jeder Block gibt das Attribut data-wst-controller="block.[name]" für das JS-Auto-Init aus.
+Jeder Block gibt das Attribut data-xxx-controller="block.[name]" für das JS-Auto-Init aus.
 6. Theme Options (Admin): Erstelle eine Einstellungsseite unter "Design > Theme Optionen" via OptionController für:
 •
-Branding (Logo, Farben), Typografie (lokale Fonts), Layout-Modus (Boxed/Full-Width), Social Media Links und Custom Scripts (Header/Footer).
+Branding (Logo, Farben), Typografie, Layout-Modus, Social Media Links und Custom Scripts (Header/Footer).
 7. Technische Umsetzung:
 •
-Erstelle eine theme.json für Gutenberg-Vorgaben (Colors, Spacing).
+Erstelle eine theme.json für Gutenberg-Vorgaben.
 •
 Trenne strikt zwischen PHP/JS-Logik und HTML-Darstellung.
 •
-Alle Pfade müssen über get_template_directory() aufgelöst werden.
-AUFGABE: Bestätige den Erhalt dieses Prompts und beginne mit Schritt 1: Erstellung der Basis-Ordnerstruktur und der functions.php (inkl. Autoloader) unter Berücksichtigung der ws-forms Vorlage
+Nutze get_template_directory() für alle internen Pfadauflösungen.
+AUFGABE: Bestätige den Erhalt dieses Prompts und beginne mit Schritt 1: Erstellung der Basis-Ordnerstruktur und der functions.php (inkl. Autoloader) unter Berücksichtigung der technischen Vorlage, aber mit der neuen xxx_ Benennung.
