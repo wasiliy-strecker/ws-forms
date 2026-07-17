@@ -1,1 +1,0 @@
-API and Services >>> Credentials >>> API keys einen Key wählen >>> Application restrictions >>> Websites >>> Website >>> *localhost:8080/* eingeben
